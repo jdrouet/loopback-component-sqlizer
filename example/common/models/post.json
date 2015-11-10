@@ -6,6 +6,18 @@
   "options": {
     "validateUpsert": true
   },
+  "mixins": {
+    "Sqlizer": {
+      "findOne": {
+        "method": true,
+        "remote": true
+      },
+      "find": {
+        "method": true,
+        "remote": true
+      }
+    }
+  },
   "properties": {
     "title": {
       "type": "string",
@@ -17,7 +29,13 @@
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "comments": {
+      "type": "hasMany",
+      "model": "Comment",
+      "foreignKey": "postId"
+    }
+  },
   "acls": [],
   "methods": {}
 }
