@@ -5,6 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "gulp",
+    "pretest": "gulp",
     "test": "mocha 'test/*.coffee'",
     "watch": "gulp watch"
   },
