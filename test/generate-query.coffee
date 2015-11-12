@@ -1,24 +1,24 @@
 describe 'sqlizer.generateQuery', ->
 
-  CustomModel = {}
+  CustomModel = application.models.Post
   options     = {}
 
-  before ->
-    sqlizer CustomModel, options
-
   it 'should exist', ->
-    expect(CustomModel.__generateQuery).toBeDefined
+    expect(CustomModel.__generateQuery).to.exist
 
-  it 'should general join', (done) ->
+  it 'should generate a simple from', ->
+    filter = {}
+    res = CustomModel.__generateQuery filter
+    expect(res.text).to.eql 'SELECT * FROM Post'
+
+  it 'should generate a join', ->
     filter =
       join:
         relation: 'comments'
         scope:
           where:
             content: 'coucou'
-    CustomModel.__generateQuery filter, (err, res) ->
-      expect(err).not.toBeDefined
-      expect(res.params).to.be.instanceof Array
-      expect(res.params[0]).to.eql 'coucou'
-      expect(res.query).toEqual 'SELECT post.* FROM post JOIN comment ON post.id = comment.postid WHERE comment.content = $1'
-      done()
+    res = CustomModel.__generateQuery filter
+    expect(res.values).to.be.instanceof Array
+    expect(res.values[0]).to.eql 'coucou'
+    expect(res.text).toEqual 'SELECT post.* FROM post JOIN comment ON post.id = comment.postid WHERE comment.content = $1'

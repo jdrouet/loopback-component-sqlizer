@@ -21,9 +21,18 @@ module.exports = (Model, options) ->
   #
   # COMMON
   #
-
+  
+  Model.__getTableName = ->
+    ds = Model.getDataSource()
+    return ds.tableName Model.definition.name
+  
   Model.__generateQuery = (filter, callback) ->
-    callback()
+    q = squel.select()
+    q.from @__getTableName()
+    if callback and _.isFunction callback
+      return callback null, q.toParam()
+    else
+      return q.toParam()
 
   #
   # FIND

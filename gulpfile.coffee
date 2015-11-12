@@ -1,5 +1,6 @@
 gulp      = require 'gulp'
 coffee    = require 'gulp-coffee'
+gutil     = require 'gulp-util'
 mocha     = require 'gulp-mocha'
 plumber   = require 'gulp-plumber'
 
@@ -11,8 +12,10 @@ gulp.task 'build', ->
   .pipe gulp.dest 'lib'
 
 gulp.task 'test', ->
-  gulp.src 'test/*.coffee', read: false
-  .pipe plumber()
+  return gulp.src 'test/*.coffee',
+    read: false
+  .pipe plumber
+    errorHandler: false
   .pipe mocha
     require: ['./test/requirements.coffee']
 
