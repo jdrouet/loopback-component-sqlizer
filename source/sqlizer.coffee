@@ -28,7 +28,8 @@ module.exports = (Model, options) ->
   
   Model.__generateQuery = (filter, callback) ->
     q = squel.select()
-    q.from @__getTableName()
+    q.from @__getTableName(), '_origin_'
+    q.field "_origin_.*"
     if callback and _.isFunction callback
       return callback null, q.toParam()
     else

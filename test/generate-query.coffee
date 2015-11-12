@@ -9,7 +9,7 @@ describe 'sqlizer.generateQuery', ->
   it 'should generate a simple from', ->
     filter = {}
     res = CustomModel.__generateQuery filter
-    expect(res.text).to.eql 'SELECT * FROM Post'
+    expect(res.text).to.eql 'SELECT _origin_.* FROM Post `_origin_`'
 
   it 'should generate a join', ->
     filter =

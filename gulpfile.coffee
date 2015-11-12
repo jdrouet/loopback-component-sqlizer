@@ -21,4 +21,4 @@ gulp.task 'test', ->
 
 gulp.task 'watch', ['build', 'test'], ->
   gulp.watch 'source/*.coffee', ['build', 'test']
-  gulp.watch 'test/*.coffee', ['test']
+  gulp.watch 'test/*.coffee', ['build', 'test']
