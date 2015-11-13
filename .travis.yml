@@ -20,7 +20,6 @@ notifications:
 
 before_script:
   - npm install
-  - npm run build
 
 script:
   - npm test

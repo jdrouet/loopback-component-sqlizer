@@ -5,7 +5,6 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "gulp",
-    "pretest": "gulp",
     "test": "COFFEECOV_INIT_ALL=false mocha 'test/*.coffee'",
     "posttest": "istanbul report",
     "watch": "gulp watch"

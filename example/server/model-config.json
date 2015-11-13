@@ -9,7 +9,7 @@
     "mixins": [
       "loopback/common/mixins",
       "loopback/server/mixins",
-      "../../lib",
+      "../../source",
       "../common/mixins",
       "./mixins"
     ]
