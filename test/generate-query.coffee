@@ -1,19 +1,19 @@
-describe 'sqlizer.generateQuery', ->
+describe 'sqlizer.buildQuery', ->
 
   CustomModel = application.models.Post
   options     = {}
 
   it 'should exist', ->
-    expect(CustomModel.__generateQuery).to.exist
+    expect(CustomModel.__buildQuery).to.exist
 
-  it 'should generate a simple from', ->
+  it 'should build a simple from', ->
     filter = {}
-    res = CustomModel.__generateQuery filter
+    res = CustomModel.__buildQuery filter
     expect(res.text).to.eql 'SELECT Post.* FROM Post'
 
   describe 'join tables', ->
 
-    it 'should generate a query with a single join', ->
+    it 'should build a query with a single join', ->
       filter =
         join: [
           {
@@ -23,12 +23,12 @@ describe 'sqlizer.generateQuery', ->
                 content: 'coucou'
           }
         ]
-      res = CustomModel.__generateQuery filter
+      res = CustomModel.__buildQuery filter
       expect(res.values).to.be.instanceof Array
-      expect(res.values[0]).to.eql 'coucou'
       expect(res.text).to.eql 'SELECT Post.* FROM Post INNER JOIN Comment ON (Post.id = Comment.postId) WHERE (Comment.content = ?)'
+      expect(res.values[0]).to.eql 'coucou'
 
-    it 'should generate a query with two joins', ->
+    it 'should build a query with two joins', ->
       filter =
         join: [
           {
@@ -41,12 +41,12 @@ describe 'sqlizer.generateQuery', ->
             relation: 'author'
           }
         ]
-      res = CustomModel.__generateQuery filter
+      res = CustomModel.__buildQuery filter
       expect(res.values).to.be.instanceof Array
-      expect(res.values[0]).to.eql 'coucou'
       expect(res.text).to.eql 'SELECT Post.* FROM Post INNER JOIN Comment ON (Post.id = Comment.postId) INNER JOIN User ON (User.id = Post.authorId) WHERE (Comment.content = ?)'
+      expect(res.values[0]).to.eql 'coucou'
 
-    it 'should generate a query with two joins and two where', ->
+    it 'should build a query with two joins and two where', ->
       filter =
         join: [
           {
@@ -62,7 +62,7 @@ describe 'sqlizer.generateQuery', ->
                 email: 'user@example.com'
           }
         ]
-      res = CustomModel.__generateQuery filter
+      res = CustomModel.__buildQuery filter
       expect(res.values).to.be.instanceof Array
       expect(res.values[0]).to.eql 'coucou'
       expect(res.text).to.eql 'SELECT Post.* FROM Post INNER JOIN Comment ON (Post.id = Comment.postId) INNER JOIN User ON (User.id = Post.authorId) WHERE (Comment.content = ?) AND (User.email = ?)'
@@ -80,7 +80,7 @@ describe 'sqlizer.generateQuery', ->
                   gte: 'coucou'
           }
         ]
-      res = CustomModel.__generateQuery filter
+      res = CustomModel.__buildQuery filter
       expect(res.values).to.be.instanceof Array
       expect(res.values[0]).to.eql 'coucou'
       expect(res.text).to.eql 'SELECT Post.* FROM Post INNER JOIN Comment ON (Post.id = Comment.postId) WHERE (Comment.content >= ?)'
@@ -96,7 +96,7 @@ describe 'sqlizer.generateQuery', ->
                   lte: 'coucou'
           }
         ]
-      res = CustomModel.__generateQuery filter
+      res = CustomModel.__buildQuery filter
       expect(res.values).to.be.instanceof Array
       expect(res.values[0]).to.eql 'coucou'
       expect(res.text).to.eql 'SELECT Post.* FROM Post INNER JOIN Comment ON (Post.id = Comment.postId) WHERE (Comment.content <= ?)'
@@ -112,7 +112,7 @@ describe 'sqlizer.generateQuery', ->
                   neq: 'coucou'
           }
         ]
-      res = CustomModel.__generateQuery filter
+      res = CustomModel.__buildQuery filter
       expect(res.values).to.be.instanceof Array
       expect(res.values[0]).to.eql 'coucou'
       expect(res.text).to.eql 'SELECT Post.* FROM Post INNER JOIN Comment ON (Post.id = Comment.postId) WHERE (Comment.content <> ?)'
@@ -128,8 +128,31 @@ describe 'sqlizer.generateQuery', ->
                   like: 'coucou'
           }
         ]
-      res = CustomModel.__generateQuery filter
+      res = CustomModel.__buildQuery filter
       expect(res.values).to.be.instanceof Array
       expect(res.values[0]).to.eql 'coucou'
       expect(res.text).to.eql 'SELECT Post.* FROM Post INNER JOIN Comment ON (Post.id = Comment.postId) WHERE (Comment.content LIKE ?)'
+
+    it 'should handle or', ->
+      filter =
+        join: [
+          {
+            relation: 'comments'
+            scope:
+              where:
+                or: [
+                  {
+                    content:
+                      like: 'coucou'
+                  }
+                  {content: 'caca'}
+                ]
+          }
+        ]
+      res = CustomModel.__buildQuery filter
+      expect(res.values).to.be.instanceof Array
+      expect(res.values[0]).to.eql 'coucou'
+      expect(res.values[1]).to.eql 'caca'
+      expect(res.text).to.eql 'SELECT Post.* FROM Post INNER JOIN Comment ON (Post.id = Comment.postId) WHERE ((Comment.content LIKE ? OR Comment.content = ?))'
+
 

@@ -23,56 +23,66 @@ module.exports = (Model, options) ->
   #
   
   Model.__getTableName = (model) ->
-    ds = Model.getDataSource()
+    ds = @getDataSource()
     return ds.tableName model
 
-  Model.__generateJoin = (q, model, filter) ->
+  Model.__getColumnName = (model, field) ->
+    ds = @getDataSource()
+    return ds.columnName model, field
+
+  Model.__buildJoin = (q, model, filter) ->
     return if 'join' not of filter
-    Origin = Model.app.models[model]
-    originTable = Model.__getTableName model
+    Origin = @app.models[model]
+    originTable = @__getTableName model
     for join in filter.join
       if join.relation not of Origin.settings.relations
         continue
       relation = Origin.settings.relations[join.relation]
-      destTable = Model.__getTableName relation.model
+      destTable = @__getTableName relation.model
       expr = null
       if relation.type in ['hasMany', 'hasOne']
         expr = "#{originTable}.id = #{destTable}.#{relation.foreignKey}"
       else
         expr = "#{destTable}.id = #{originTable}.#{relation.foreignKey}"
-      q.join Model.__getTableName(relation.model), null, expr
+      q.join @__getTableName(relation.model), null, expr
       if join.scope?.where
-        Model.__generateWhere q, relation.model, join.scope.where
+        q.where @__buildWhere squel.expr(), 'and', relation.model, join.scope.where
     return
 
-  Model.__generateWhere = (q, model, where) ->
-    expr = squel.expr()
-    table = Model.getDataSource().tableName model
-    for key, value of where
-      column = Model.getDataSource().columnName model, key
-      Model.__generateCondition expr, table, column, value
-    q.where expr
-
-  Model.__generateCondition = (expr, table, column, value) ->
-    operators =
-      like: 'LIKE'
-      neq: '<>'
-      gte: '>='
-      lte: '<='
-    if _.isObject value
-      for skey, svalue of value
-        if skey of operators
-          expr.and "#{table}.#{column} #{operators[skey]} ?", svalue
-    else
-      expr.and "#{table}.#{column} = ?", value
+  Model.__buildWhere = (root, op, model, where) ->
+    table = @__getTableName model
+    for key, clauses of where
+      if key in ['or', 'and'] and Array.isArray clauses
+        root["#{key}_begin"]()
+        for clause in clauses
+          @__buildWhere root, key, model, clause
+        root.end()
+      else
+        expression = clauses
+        column = @__getColumnName model, key
+        if expression is null or expression is undefined
+          root[op] "#{table}.#{column} IS NULL"
+        else if _.isObject expression
+          for operator, value of expression
+            if operator is 'like'
+              root[op] "#{table}.#{column} LIKE ?", value
+            else if operator is 'neq'
+              root[op] "#{table}.#{column} <> ?", value
+            else if operator is 'gte'
+              root[op] "#{table}.#{column} >= ?", value
+            else if operator is 'lte'
+              root[op] "#{table}.#{column} <= ?", value
+        else
+          root[op] "#{table}.#{column} = ?", expression
+    return root
   
-  Model.__generateQuery = (filter, callback) ->
+  Model.__buildQuery = (filter, callback) ->
     modelName = @definition.name
     tableName = @__getTableName modelName
     q = squel.select()
     q.from tableName
     q.field "#{tableName}.*"
-    @__generateJoin q, modelName, filter
+    @__buildJoin q, modelName, filter
     if callback and _.isFunction callback
       return callback null, q.toParam()
     else
