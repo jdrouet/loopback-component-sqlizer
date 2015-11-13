@@ -6,7 +6,8 @@
   "scripts": {
     "build": "gulp",
     "pretest": "gulp",
-    "test": "mocha 'test/*.coffee'",
+    "test": "COFFEECOV_INIT_ALL=false mocha 'test/*.coffee'",
+    "posttest": "istanbul report",
     "watch": "gulp watch"
   },
   "repository": {
@@ -33,6 +34,7 @@
   },
   "devDependencies": {
     "chai": "^3.4.1",
+    "codecov.io": "^0.1.6",
     "coffee-coverage": "^0.7.0",
     "coffee-script": "^1.10.0",
     "compression": "^1.0.3",

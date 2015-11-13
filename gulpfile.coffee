@@ -17,6 +17,7 @@ gulp.task 'test', ->
   .pipe plumber
     errorHandler: false
   .pipe mocha
+    reporter: 'spec'
     require: ['./test/requirements.coffee']
 
 gulp.task 'watch', ['build', 'test'], ->
