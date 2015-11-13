@@ -50,8 +50,21 @@ module.exports = (Model, options) ->
     table = Model.getDataSource().tableName model
     for key, value of where
       column = Model.getDataSource().columnName model, key
-      expr.and "#{table}.#{column} = ?", value
+      Model.__generateCondition expr, table, column, value
     q.where expr
+
+  Model.__generateCondition = (expr, table, column, value) ->
+    operators =
+      like: 'LIKE'
+      neq: '<>'
+      gte: '>='
+      lte: '<='
+    if _.isObject value
+      for skey, svalue of value
+        if skey of operators
+          expr.and "#{table}.#{column} #{operators[skey]} ?", svalue
+    else
+      expr.and "#{table}.#{column} = ?", value
   
   Model.__generateQuery = (filter, callback) ->
     modelName = @definition.name

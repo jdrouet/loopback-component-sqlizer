@@ -30,6 +30,11 @@
   },
   "validations": [],
   "relations": {
+    "author": {
+      "type": "belongsTo",
+      "model": "User",
+      "foreignKey": "authorId"
+    },
     "comments": {
       "type": "hasMany",
       "model": "Comment",
