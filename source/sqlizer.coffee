@@ -113,6 +113,22 @@ module.exports = (Model, options) ->
         else
           callback null, objects
 
+    if options.findOne.remote
+      Model.remoteMethod 'sqlFind',
+        accepts: [
+          {
+            arg: 'filter'
+            type: 'object'
+            description: 'Filter defining fields, where, include, order, offset, and limit'
+          }
+        ]
+        returns:
+          arg: 'data'
+          type: [Model.definition.name]
+          root: true
+        http:
+          verb: 'get'
+          path: '/sql-find-one'
   #
   # FINDONE
   #
@@ -134,5 +150,22 @@ module.exports = (Model, options) ->
           connector.getModelDefinition(self.definition.name).model.include object, filter.include, options, callback
         else
           callback null, object
+
+    if options.findOne.remote
+      Model.remoteMethod 'sqlFindOne',
+        accepts: [
+          {
+            arg: 'filter'
+            type: 'object'
+            description: 'Filter defining fields, where, include, order, offset, and limit'
+          }
+        ]
+        returns:
+          arg: 'data'
+          type: Model.definition.name
+          root: true
+        http:
+          verb: 'get'
+          path: '/sql-find-one'
 
   return
