@@ -32,6 +32,7 @@
     "squel": "^4.2.2"
   },
   "devDependencies": {
+    "bluebird": "^3.0.5",
     "chai": "^3.4.1",
     "codecov.io": "^0.1.6",
     "coffee-coverage": "^0.7.0",
