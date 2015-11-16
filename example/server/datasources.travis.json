@@ -2,8 +2,7 @@
   "db": {
     "name": "db",
     "connector": "postgresql",
-    "port": "5433",
-    "host": "localhost",
+    "port": "5432",
     "database": "blog",
     "username": "postgres",
     "debug": true

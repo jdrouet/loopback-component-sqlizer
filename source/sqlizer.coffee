@@ -21,7 +21,12 @@ module.exports = (Model, options) ->
   #
   # COMMON
   #
-  
+
+  Model.__getEngine = ->
+    if @getDataSource().connector.settings.connector is 'postgresql'
+      return squel.useFlavour 'postgres'
+    return squel
+ 
   Model.__getTableName = (model) ->
     ds = @getDataSource()
     return ds.tableName model
@@ -46,7 +51,9 @@ module.exports = (Model, options) ->
         expr = "#{destTable}.id = #{originTable}.#{relation.foreignKey}"
       q.join @__getTableName(relation.model), null, expr
       if join.scope?.where
-        q.where @__buildWhere squel.expr(), 'and', relation.model, join.scope.where
+        where = @__buildWhere(squel.expr(), 'and', relation.model, join.scope.where).toParam()
+        # TO AVOID SQUEL BUG
+        q.where.apply q.where, _.flatten [where.text, where.values]
     return
 
   Model.__buildWhere = (root, op, model, where) ->
@@ -76,17 +83,14 @@ module.exports = (Model, options) ->
           root[op] "#{table}.#{column} = ?", expression
     return root
   
-  Model.__buildQuery = (filter, callback) ->
+  Model.__buildQuery = (filter) ->
     modelName = @definition.name
     tableName = @__getTableName modelName
-    q = squel.select()
+    q = @__getEngine().select()
     q.from tableName
     q.field "#{tableName}.*"
     @__buildJoin q, modelName, filter
-    if callback and _.isFunction callback
-      return callback null, q.toParam()
-    else
-      return q.toParam()
+    return q.toParam()
 
   #
   # FIND
@@ -94,7 +98,17 @@ module.exports = (Model, options) ->
 
   if options.find.method
     Model.sqlFind = (filter, callback) ->
-      callback()
+      query = @__buildQuery filter
+      connector = @getDataSource().connector
+      self = @
+      connector.execute query.text, query.values, {}, (err, rows) ->
+        return callback err if err
+        objects = _.map rows, (item) ->
+          connector.fromRow self.definition.name, item
+        if filter?.include
+          connector.getModelDefinition(model).model.include objects, filter.include, {}, callback
+        else
+          callback null, objects
 
   #
   # FINDONE

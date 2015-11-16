@@ -25,7 +25,7 @@ describe 'sqlizer.buildQuery', ->
         ]
       res = CustomModel.__buildQuery filter
       expect(res.values).to.be.instanceof Array
-      expect(res.text).to.eql 'SELECT Post.* FROM Post INNER JOIN Comment ON (Post.id = Comment.postId) WHERE (Comment.content = ?)'
+      expect(res.text).to.eql 'SELECT Post.* FROM Post INNER JOIN Comment ON (Post.id = Comment.postId) WHERE (Comment.content = $1)'
       expect(res.values[0]).to.eql 'coucou'
 
     it 'should build a query with two joins', ->
@@ -43,7 +43,7 @@ describe 'sqlizer.buildQuery', ->
         ]
       res = CustomModel.__buildQuery filter
       expect(res.values).to.be.instanceof Array
-      expect(res.text).to.eql 'SELECT Post.* FROM Post INNER JOIN Comment ON (Post.id = Comment.postId) INNER JOIN User ON (User.id = Post.authorId) WHERE (Comment.content = ?)'
+      expect(res.text).to.eql 'SELECT Post.* FROM Post INNER JOIN Comment ON (Post.id = Comment.postId) INNER JOIN User ON (User.id = Post.authorId) WHERE (Comment.content = $1)'
       expect(res.values[0]).to.eql 'coucou'
 
     it 'should build a query with two joins and two where', ->
@@ -65,7 +65,7 @@ describe 'sqlizer.buildQuery', ->
       res = CustomModel.__buildQuery filter
       expect(res.values).to.be.instanceof Array
       expect(res.values[0]).to.eql 'coucou'
-      expect(res.text).to.eql 'SELECT Post.* FROM Post INNER JOIN Comment ON (Post.id = Comment.postId) INNER JOIN User ON (User.id = Post.authorId) WHERE (Comment.content = ?) AND (User.email = ?)'
+      expect(res.text).to.eql 'SELECT Post.* FROM Post INNER JOIN Comment ON (Post.id = Comment.postId) INNER JOIN User ON (User.id = Post.authorId) WHERE (Comment.content = $1) AND (User.email = $2)'
 
   describe 'where', ->
 
@@ -83,7 +83,7 @@ describe 'sqlizer.buildQuery', ->
       res = CustomModel.__buildQuery filter
       expect(res.values).to.be.instanceof Array
       expect(res.values[0]).to.eql 'coucou'
-      expect(res.text).to.eql 'SELECT Post.* FROM Post INNER JOIN Comment ON (Post.id = Comment.postId) WHERE (Comment.content >= ?)'
+      expect(res.text).to.eql 'SELECT Post.* FROM Post INNER JOIN Comment ON (Post.id = Comment.postId) WHERE (Comment.content >= $1)'
 
     it 'should handle lte', ->
       filter =
@@ -99,7 +99,7 @@ describe 'sqlizer.buildQuery', ->
       res = CustomModel.__buildQuery filter
       expect(res.values).to.be.instanceof Array
       expect(res.values[0]).to.eql 'coucou'
-      expect(res.text).to.eql 'SELECT Post.* FROM Post INNER JOIN Comment ON (Post.id = Comment.postId) WHERE (Comment.content <= ?)'
+      expect(res.text).to.eql 'SELECT Post.* FROM Post INNER JOIN Comment ON (Post.id = Comment.postId) WHERE (Comment.content <= $1)'
 
     it 'should handle neq', ->
       filter =
@@ -115,7 +115,7 @@ describe 'sqlizer.buildQuery', ->
       res = CustomModel.__buildQuery filter
       expect(res.values).to.be.instanceof Array
       expect(res.values[0]).to.eql 'coucou'
-      expect(res.text).to.eql 'SELECT Post.* FROM Post INNER JOIN Comment ON (Post.id = Comment.postId) WHERE (Comment.content <> ?)'
+      expect(res.text).to.eql 'SELECT Post.* FROM Post INNER JOIN Comment ON (Post.id = Comment.postId) WHERE (Comment.content <> $1)'
 
     it 'should handle like', ->
       filter =
@@ -131,7 +131,7 @@ describe 'sqlizer.buildQuery', ->
       res = CustomModel.__buildQuery filter
       expect(res.values).to.be.instanceof Array
       expect(res.values[0]).to.eql 'coucou'
-      expect(res.text).to.eql 'SELECT Post.* FROM Post INNER JOIN Comment ON (Post.id = Comment.postId) WHERE (Comment.content LIKE ?)'
+      expect(res.text).to.eql 'SELECT Post.* FROM Post INNER JOIN Comment ON (Post.id = Comment.postId) WHERE (Comment.content LIKE $1)'
 
     it 'should handle or', ->
       filter =
@@ -153,6 +153,6 @@ describe 'sqlizer.buildQuery', ->
       expect(res.values).to.be.instanceof Array
       expect(res.values[0]).to.eql 'coucou'
       expect(res.values[1]).to.eql 'caca'
-      expect(res.text).to.eql 'SELECT Post.* FROM Post INNER JOIN Comment ON (Post.id = Comment.postId) WHERE ((Comment.content LIKE ? OR Comment.content = ?))'
+      expect(res.text).to.eql 'SELECT Post.* FROM Post INNER JOIN Comment ON (Post.id = Comment.postId) WHERE ((Comment.content LIKE $1 OR Comment.content = $2))'
 
 
