@@ -118,7 +118,21 @@ module.exports = (Model, options) ->
   #
 
   if options.findOne.method
-    Model.sqlFindOne = (filter, callback) ->
-      callback()
+    Model.sqlFindOne = (filter, options, callback) ->
+      if _.isFunction(options) and not callback
+        callback = options
+        options = {}
+      filter.limit = 1
+      query = @__buildQuery filter
+      connector = @getDataSource().connector
+      self = @
+      connector.execute query.text, query.values, options, (err, rows) ->
+        return callback err if err
+        return callback() if not rows or not Array.isArray(rows) or rows.length is 0
+        object = connector.fromRow self.definition.name, rows[0]
+        if filter?.include
+          connector.getModelDefinition(self.definition.name).model.include object, filter.include, options, callback
+        else
+          callback null, object
 
   return
