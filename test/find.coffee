@@ -45,3 +45,26 @@ describe 'sqlizer.find', ->
       expect(err).to.not.exist
       expect(res).to.be.instanceOf Array
       done err
+
+  it 'should return a post with includes', (done) ->
+    application.models.Post.sqlFind
+      include: [
+        {
+          relation: 'comments'
+        }
+      ]
+      join: [
+        {
+          relation: 'comments'
+          scope:
+            where:
+              content: 'coucou'
+        }
+      ]
+    , (err, res) ->
+      expect(err).to.not.exist
+      expect(res).to.be.instanceOf Array
+      for post in res
+        expect(post).to.exist
+        expect(post.comments).to.be.instanceOf Array
+      done err

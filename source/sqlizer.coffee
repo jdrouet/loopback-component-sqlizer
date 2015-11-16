@@ -106,7 +106,7 @@ module.exports = (Model, options) ->
         objects = _.map rows, (item) ->
           connector.fromRow self.definition.name, item
         if filter?.include
-          connector.getModelDefinition(model).model.include objects, filter.include, {}, callback
+          connector.getModelDefinition(self.definition.name).model.include objects, filter.include, {}, callback
         else
           callback null, objects
 
