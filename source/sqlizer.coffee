@@ -97,16 +97,19 @@ module.exports = (Model, options) ->
   #
 
   if options.find.method
-    Model.sqlFind = (filter, callback) ->
+    Model.sqlFind = (filter, options, callback) ->
+      if _.isFunction(options) and not callback
+        callback = options
+        options = {}
       query = @__buildQuery filter
       connector = @getDataSource().connector
       self = @
-      connector.execute query.text, query.values, {}, (err, rows) ->
+      connector.execute query.text, query.values, options, (err, rows) ->
         return callback err if err
         objects = _.map rows, (item) ->
           connector.fromRow self.definition.name, item
         if filter?.include
-          connector.getModelDefinition(self.definition.name).model.include objects, filter.include, {}, callback
+          connector.getModelDefinition(self.definition.name).model.include objects, filter.include, options, callback
         else
           callback null, objects
 
