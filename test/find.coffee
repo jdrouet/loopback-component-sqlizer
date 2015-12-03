@@ -31,6 +31,34 @@ describe 'sqlizer.find', ->
       mock.comment = comment
       done err
 
+  before (done) ->
+    application.models.Comment.create
+      postId: mock.post.id
+      content: 'nothing'
+      userId: mock.user.id
+    , (err, comment) ->
+      mock.comment = comment
+      done err
+
+  it 'should return a single post', (done) ->
+    application.models.Post.sqlFind
+      join: [
+        {
+          relation: 'comments'
+          scope:
+            where:
+              or: [
+                {content: 'coucou'}
+                {content: 'nothing'}
+              ]
+        }
+      ]
+    , (err, res) ->
+      expect(err).to.not.exist
+      expect(res).to.be.instanceOf Array
+      expect(res).to.have.length 1
+      done err
+
   it 'should return a post', (done) ->
     application.models.Post.sqlFind
       join: [
@@ -44,6 +72,7 @@ describe 'sqlizer.find', ->
     , (err, res) ->
       expect(err).to.not.exist
       expect(res).to.be.instanceOf Array
+      expect(res).to.have.length 1
       done err
 
   it 'should return a post with includes', (done) ->

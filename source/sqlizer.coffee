@@ -89,6 +89,7 @@ module.exports = (Model, options) ->
     q = @__getEngine().select()
     q.from tableName
     q.field "#{tableName}.*"
+    q.distinct()
     @__buildJoin q, modelName, filter
     return q.toParam()
 

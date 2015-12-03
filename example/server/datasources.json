@@ -6,6 +6,7 @@
     "host": "localhost",
     "database": "blog",
     "username": "postgres",
+    "password": "password",
     "debug": true
   }
 }
