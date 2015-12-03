@@ -1,6 +1,6 @@
 {
   "name": "loopback-component-sqlizer",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Usefull mixins for sql databases",
   "main": "lib/index.js",
   "scripts": {
