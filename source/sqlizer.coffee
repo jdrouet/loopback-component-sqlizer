@@ -114,7 +114,7 @@ module.exports = (Model, options) ->
         else
           callback null, objects
 
-    if options.findOne.remote
+    if options.find.remote
       Model.remoteMethod 'sqlFind',
         accepts: [
           {
